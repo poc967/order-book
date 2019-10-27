@@ -1,5 +1,6 @@
 function findMatch(existingBook, incomingOrder) {
-  return existingBook.filter(bookItem => (bookItem.type !== incomingOrder.type))
+  return existingBook.filter(bookItem => (bookItem.type !== incomingOrder.type)
+    && !((bookItem.price !== incomingOrder.price) && (bookItem.quantity !== incomingOrder.quantity)))
 }
 
 function filterMatch(existingBook, incomingOrder) {
@@ -8,44 +9,33 @@ function filterMatch(existingBook, incomingOrder) {
     && (bookItem.price === incomingOrder.price))
 }
 
+
 function reconcileOrder(existingBook, incomingOrder) {
-  let updatedBook
   const filteredBook = findMatch(existingBook, incomingOrder)
 
-  if (filteredBook.length || (filteredBook[0].price != incomingOrder.price)) {
-    if (filteredBook[0].quantity < incomingOrder.quantity && filteredBook[0].price >= incomingOrder.price) {
+  if (filteredBook.length) {
 
-      updatedBook = filterMatch(existingBook, incomingOrder)
 
-      /*let updatedIncomingOrder = {
-        type: incomingOrder.type,
-        quantity: (incomingOrder.quantity - filteredBook[0].quantity),
-        price: incomingOrder.price
-      }*/
+    if ((filteredBook[0].quantity !== incomingOrder.quantity)) {
+      let updatedBook = filterMatch(existingBook, incomingOrder)
 
-      let updatedIncomingOrder = { quantity: (incomingOrder.quantity - filteredBook[0].quantity), ...incomingOrder }
-
-      return updatedBook = [...updatedBook, updatedIncomingOrder]
-
-    } else if (filteredBook[0].quantity > incomingOrder.quantity && filteredBook[0].price >= incomingOrder.price) {
-
-      updatedBook = filterMatch(existingBook, incomingOrder)
-
-      let updatedFilteredBookOrder = {
-        type: filteredBook[0].type,
-        quantity: (filteredBook[0].quantity - incomingOrder.quantity),
-        price: filteredBook[0].price
+      const updatedOrder = {
+        type: ((filteredBook[0].quantity > incomingOrder.quantity) ? filteredBook[0].type : incomingOrder.type),
+        quantity: Math.abs(filteredBook[0].quantity - incomingOrder.quantity),
+        price: ((filteredBook[0].price > incomingOrder.price) ? filteredBook[0].price : incomingOrder.price)
       }
 
-      return updatedBook = [...updatedBook, updatedFilteredBookOrder]
+      updatedBook = [...updatedBook, updatedOrder]
+      return updatedBook
 
-    } else if (filteredBook[0].quantity === incomingOrder.quantity) {
-      return updatedBook = filterMatch(existingBook, incomingOrder)
+    } else {
+      let updatedBook = filterMatch(existingBook, incomingOrder)
+      return updatedBook
     }
 
   } else {
-
-    return updatedBook = [...existingBook, incomingOrder]
+    let updatedBook = [...existingBook, incomingOrder]
+    return updatedBook
 
   }
 }
